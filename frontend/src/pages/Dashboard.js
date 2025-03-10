@@ -19,17 +19,16 @@ const Dashboard = () => {
     const [stats, setStats] = useState({
         totalInvoices: 0,
         pendingReview: 0,
-        totalValue: 0
+        totalValue: 0,
+        minutesSaved: 0
     });
-    const [timer, setTimer] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         fetchStats();
-        const interval = setInterval(() => {
-            setTimer((prev) => prev + 1);
-        }, 60000);
+        // Fetch stats every 30 seconds
+        const interval = setInterval(fetchStats, 30000);
         return () => clearInterval(interval);
     }, []);
 
@@ -45,7 +44,8 @@ const Dashboard = () => {
             setStats({
                 totalInvoices: Number(data.totalInvoices) || 0,
                 pendingReview: Number(data.pendingReview) || 0,
-                totalValue: Number(data.totalValue) || 0
+                totalValue: Number(data.totalValue) || 0,
+                minutesSaved: Number(data.minutesSaved) || 0
             });
         } catch (error) {
             console.error('Error fetching stats:', error);
@@ -53,7 +53,8 @@ const Dashboard = () => {
             setStats({
                 totalInvoices: 0,
                 pendingReview: 0,
-                totalValue: 0
+                totalValue: 0,
+                minutesSaved: 0
             });
         } finally {
             setLoading(false);
@@ -132,7 +133,7 @@ const Dashboard = () => {
                 <Grid item xs={12} sm={6} md={3}>
                     <StatCard
                         title="Minutes Saved"
-                        value={formatValue(timer)}
+                        value={formatValue(stats.minutesSaved)}
                         icon={TimerIcon}
                     />
                 </Grid>

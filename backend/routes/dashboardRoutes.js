@@ -68,15 +68,20 @@ router.get('/stats', async (req, res) => {
         // Get real statistics
         const totalInvoices = await Invoice.countDocuments();
         const pendingReview = await Invoice.countDocuments({ status: 'review' });
+        const processedInvoices = await Invoice.countDocuments({ status: 'approved' });
         const totalValueAgg = await Invoice.aggregate([
             { $group: { _id: null, total: { $sum: '$amount' } } }
         ]);
         const totalValue = totalValueAgg.length > 0 ? totalValueAgg[0].total : 0;
 
+        // Calculate minutes saved (1 minute per processed invoice)
+        const minutesSaved = processedInvoices;
+
         const stats = {
             totalInvoices,
             pendingReview,
-            totalValue
+            totalValue,
+            minutesSaved
         };
         
         console.log('Sending dashboard stats:', stats);
