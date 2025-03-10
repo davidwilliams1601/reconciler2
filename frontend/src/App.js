@@ -1,63 +1,36 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
-import {
-  Box,
-  CssBaseline,
-  Container,
-  AppBar,
-  Toolbar,
-  Typography,
-  Button
-} from '@mui/material';
-import {
-  Dashboard as DashboardIcon,
-  Settings as SettingsIcon
-} from '@mui/icons-material';
-import theme from './theme';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
+import InvoiceUpload from './pages/InvoiceUpload';
+
+const theme = createTheme({
+    palette: {
+        mode: 'light',
+        primary: {
+            main: '#1976d2',
+        },
+    },
+});
 
 function App() {
-  return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          <AppBar position="static">
-            <Toolbar>
-              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                Invoice Reconciliation
-              </Typography>
-              <Button
-                color="inherit"
-                component={Link}
-                to="/"
-                startIcon={<DashboardIcon />}
-              >
-                Dashboard
-              </Button>
-              <Button
-                color="inherit"
-                component={Link}
-                to="/settings"
-                startIcon={<SettingsIcon />}
-              >
-                Settings
-              </Button>
-            </Toolbar>
-          </AppBar>
-          <Container component="main" sx={{ mt: 4, mb: 4 }}>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/settings" element={<Settings />} />
-            </Routes>
-          </Container>
-        </Box>
-      </Router>
-    </ThemeProvider>
-  );
+    return (
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Router>
+                <Layout>
+                    <Routes>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/settings" element={<Settings />} />
+                        <Route path="/upload" element={<InvoiceUpload />} />
+                    </Routes>
+                </Layout>
+            </Router>
+        </ThemeProvider>
+    );
 }
 
 export default App; 
