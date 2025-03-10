@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
     Box,
@@ -18,43 +18,46 @@ const Settings = () => {
     const [loading, setLoading] = useState(false);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-    useEffect(() => {
-        fetchSettings();
-    }, []);
-
-    const fetchSettings = async () => {
+    const fetchSettings = useCallback(async () => {
         try {
             setLoading(true);
             const response = await axios.get('/api/settings');
+            console.log('Fetched settings:', response.data);
             setKeys(response.data);
         } catch (error) {
-            console.error('Error fetching settings', error);
-            showSnackbar('Error loading settings', 'error');
+            console.error('Error fetching settings:', error);
+            const errorMessage = error.response?.data?.message || 'Error loading settings';
+            showSnackbar(errorMessage, 'error');
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        fetchSettings();
+    }, [fetchSettings]);
 
     const handleSave = async () => {
-        if (!validateKeys()) {
-            showSnackbar('Please fill in all API keys', 'warning');
-            return;
-        }
-
         try {
             setLoading(true);
-            await axios.post('/api/settings', keys);
+            console.log('Saving settings:', keys);
+            const response = await axios.post('/api/settings', keys);
+            console.log('Save response:', response.data);
             showSnackbar('Settings saved successfully', 'success');
         } catch (error) {
-            console.error('Error saving settings', error);
-            showSnackbar('Error saving settings', 'error');
+            console.error('Error saving settings:', error);
+            const errorMessage = error.response?.data?.message || 'Error saving settings';
+            showSnackbar(errorMessage, 'error');
         } finally {
             setLoading(false);
         }
     };
 
-    const validateKeys = () => {
-        return Object.values(keys).every(key => key.trim().length > 0);
+    const handleChange = (field) => (event) => {
+        setKeys(prev => ({
+            ...prev,
+            [field]: event.target.value
+        }));
     };
 
     const showSnackbar = (message, severity) => {
@@ -87,7 +90,7 @@ const Settings = () => {
                             variant="outlined"
                             type="password"
                             value={keys.dext}
-                            onChange={(e) => setKeys({ ...keys, dext: e.target.value })}
+                            onChange={handleChange('dext')}
                             helperText="Enter your Dext API key for invoice processing"
                         />
                     </Grid>
@@ -98,7 +101,7 @@ const Settings = () => {
                             variant="outlined"
                             type="password"
                             value={keys.vision}
-                            onChange={(e) => setKeys({ ...keys, vision: e.target.value })}
+                            onChange={handleChange('vision')}
                             helperText="Enter your Google Vision API key for OCR processing"
                         />
                     </Grid>
@@ -109,7 +112,7 @@ const Settings = () => {
                             variant="outlined"
                             type="password"
                             value={keys.xero}
-                            onChange={(e) => setKeys({ ...keys, xero: e.target.value })}
+                            onChange={handleChange('xero')}
                             helperText="Enter your Xero API key for accounting integration"
                         />
                     </Grid>
