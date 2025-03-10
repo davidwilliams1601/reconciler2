@@ -28,8 +28,31 @@ app.get('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log('MongoDB Connected'))
-    .catch(err => console.log(err));
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log('MongoDB Connected');
+    startServer();
+  })
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  });
+
+// Start server with error handling
+function startServer() {
+  const server = app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  }).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log(`Port ${PORT} is busy, trying ${PORT + 1}`);
+      server.close();
+      app.listen(PORT + 1, () => {
+        console.log(`Server running on port ${PORT + 1}`);
+      });
+    } else {
+      console.error('Server error:', err);
+    }
+  });
+} 
