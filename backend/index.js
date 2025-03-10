@@ -6,6 +6,7 @@ const dotenv = require('dotenv');
 const invoiceRoutes = require('./routes/invoiceRoutes');
 const authRoutes = require('./routes/authRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 dotenv.config();
 const app = express();
@@ -26,6 +27,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // API Routes - Make sure these come BEFORE the static file serving
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/settings', settingsRoutes);

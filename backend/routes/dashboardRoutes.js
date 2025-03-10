@@ -13,6 +13,7 @@ router.get('/stats', async (req, res) => {
             totalValue: 0
         };
         
+        console.log('Sending dashboard stats:', mockStats);
         res.json(mockStats);
     } catch (error) {
         console.error('Error fetching dashboard stats:', error);

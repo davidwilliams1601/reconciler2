@@ -39,10 +39,13 @@ const Dashboard = () => {
             setError(null);
             const response = await axios.get('/api/dashboard/stats');
             console.log('Dashboard stats:', response.data);
+            
+            // Ensure we have a valid response with all required fields
+            const data = response.data || {};
             setStats({
-                totalInvoices: response.data.totalInvoices || 0,
-                pendingReview: response.data.pendingReview || 0,
-                totalValue: response.data.totalValue || 0
+                totalInvoices: Number(data.totalInvoices) || 0,
+                pendingReview: Number(data.pendingReview) || 0,
+                totalValue: Number(data.totalValue) || 0
             });
         } catch (error) {
             console.error('Error fetching stats:', error);
