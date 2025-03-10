@@ -12,12 +12,18 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors({
-  origin: '*', // Allow all origins for testing
+
+// Configure CORS
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? 'https://reconciler-backend.onrender.com'
+    : ['http://localhost:3000', 'http://localhost:3001'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}));
+};
+
+app.use(cors(corsOptions));
 
 // API Routes - Make sure these come BEFORE the static file serving
 app.use('/api/invoices', invoiceRoutes);
