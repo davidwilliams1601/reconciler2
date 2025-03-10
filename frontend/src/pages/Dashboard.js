@@ -88,13 +88,13 @@ const Dashboard = () => {
                 <Grid item xs={12} sm={6} md={3}>
                     <StatCard
                         title="Total Value"
-                        value={`$${stats.totalValue.toLocaleString()}`}
+                        value={`£${stats.totalValue.toLocaleString()}`}
                         icon={MoneyIcon}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                     <StatCard
-                        title="Minutes Since Last"
+                        title="Minutes Saved"
                         value={timer}
                         icon={TimerIcon}
                     />
