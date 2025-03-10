@@ -1,0 +1,13 @@
+{
+  "name": "invoice-reconciliation",
+  "version": "1.0.0",
+  "description": "Invoice Reconciliation Application",
+  "scripts": {
+    "install-backend": "cd backend && npm install",
+    "install-frontend": "cd frontend && npm install",
+    "build-frontend": "cd frontend && npm run build",
+    "start-backend": "cd backend && npm start",
+    "heroku-postbuild": "npm run install-frontend && npm run build-frontend && npm run install-backend",
+    "start": "npm run start-backend"
+  }
+} 
