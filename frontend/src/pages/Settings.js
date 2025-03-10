@@ -1,33 +1,33 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import axios from '../config/axios';
 import {
     Box,
-    Typography,
-    TextField,
     Button,
+    TextField,
+    Typography,
     Paper,
-    Grid,
-    Snackbar,
     Alert,
     CircularProgress
 } from '@mui/material';
-import { Save as SaveIcon } from '@mui/icons-material';
 
 const Settings = () => {
-    const [keys, setKeys] = useState({ dext: '', vision: '', xero: '' });
-    const [loading, setLoading] = useState(false);
-    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+    const [settings, setSettings] = useState({
+        googleVisionApiKey: '',
+    });
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(false);
 
     const fetchSettings = useCallback(async () => {
         try {
             setLoading(true);
             const response = await axios.get('/api/settings');
-            console.log('Fetched settings:', response.data);
-            setKeys(response.data);
-        } catch (error) {
-            console.error('Error fetching settings:', error);
-            const errorMessage = error.response?.data?.message || 'Error loading settings';
-            showSnackbar(errorMessage, 'error');
+            setSettings(response.data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching settings:', err);
+            setError('Failed to load settings. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -37,110 +37,84 @@ const Settings = () => {
         fetchSettings();
     }, [fetchSettings]);
 
-    const handleSave = async () => {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         try {
-            setLoading(true);
-            console.log('Saving settings:', keys);
-            const response = await axios.post('/api/settings', keys);
-            console.log('Save response:', response.data);
-            showSnackbar('Settings saved successfully', 'success');
-        } catch (error) {
-            console.error('Error saving settings:', error);
-            const errorMessage = error.response?.data?.message || 'Error saving settings';
-            showSnackbar(errorMessage, 'error');
+            setSaving(true);
+            setError(null);
+            setSuccess(false);
+
+            await axios.post('/api/settings', settings);
+            setSuccess(true);
+        } catch (err) {
+            console.error('Error saving settings:', err);
+            setError(err.response?.data?.message || 'Failed to save settings. Please try again.');
         } finally {
-            setLoading(false);
+            setSaving(false);
         }
     };
 
-    const handleChange = (field) => (event) => {
-        setKeys(prev => ({
+    const handleChange = (e) => {
+        setSettings(prev => ({
             ...prev,
-            [field]: event.target.value
+            [e.target.name]: e.target.value
         }));
-    };
-
-    const showSnackbar = (message, severity) => {
-        setSnackbar({ open: true, message, severity });
-    };
-
-    const handleCloseSnackbar = () => {
-        setSnackbar({ ...snackbar, open: false });
     };
 
     if (loading) {
         return (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
                 <CircularProgress />
             </Box>
         );
     }
 
     return (
-        <Box>
-            <Typography variant="h1" gutterBottom>
-                API Settings
-            </Typography>
-            <Paper elevation={3} sx={{ p: 4, mt: 2 }}>
-                <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                        <TextField
-                            fullWidth
-                            label="Dext API Key"
-                            variant="outlined"
-                            type="password"
-                            value={keys.dext}
-                            onChange={handleChange('dext')}
-                            helperText="Enter your Dext API key for invoice processing"
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
+        <Box p={3}>
+            <Paper elevation={3}>
+                <Box p={3}>
+                    <Typography variant="h5" gutterBottom>
+                        Settings
+                    </Typography>
+
+                    {error && (
+                        <Alert severity="error" sx={{ mb: 2 }}>
+                            {error}
+                        </Alert>
+                    )}
+
+                    {success && (
+                        <Alert severity="success" sx={{ mb: 2 }}>
+                            Settings saved successfully!
+                        </Alert>
+                    )}
+
+                    <form onSubmit={handleSubmit}>
                         <TextField
                             fullWidth
                             label="Google Vision API Key"
-                            variant="outlined"
+                            name="googleVisionApiKey"
+                            value={settings.googleVisionApiKey || ''}
+                            onChange={handleChange}
+                            margin="normal"
                             type="password"
-                            value={keys.vision}
-                            onChange={handleChange('vision')}
-                            helperText="Enter your Google Vision API key for OCR processing"
+                            helperText="Enter your Google Vision API private key"
+                            required
                         />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField
-                            fullWidth
-                            label="Xero API Key"
-                            variant="outlined"
-                            type="password"
-                            value={keys.xero}
-                            onChange={handleChange('xero')}
-                            helperText="Enter your Xero API key for accounting integration"
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            size="large"
-                            startIcon={<SaveIcon />}
-                            onClick={handleSave}
-                            disabled={loading}
-                        >
-                            Save Settings
-                        </Button>
-                    </Grid>
-                </Grid>
-            </Paper>
 
-            <Snackbar
-                open={snackbar.open}
-                autoHideDuration={6000}
-                onClose={handleCloseSnackbar}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            >
-                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
+                        <Box mt={2}>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                color="primary"
+                                disabled={saving}
+                            >
+                                {saving ? 'Saving...' : 'Save Settings'}
+                            </Button>
+                        </Box>
+                    </form>
+                </Box>
+            </Paper>
         </Box>
     );
 };
