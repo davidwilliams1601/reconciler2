@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
     Grid,
-    Paper,
     Typography,
     Box,
     Card,
@@ -17,9 +16,14 @@ import {
 } from '@mui/icons-material';
 
 const Dashboard = () => {
-    const [stats, setStats] = useState({ totalInvoices: 0, pendingReview: 0, totalValue: 0 });
+    const [stats, setStats] = useState({
+        totalInvoices: 0,
+        pendingReview: 0,
+        totalValue: 0
+    });
     const [timer, setTimer] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         fetchStats();
@@ -32,13 +36,35 @@ const Dashboard = () => {
     const fetchStats = async () => {
         try {
             setLoading(true);
+            setError(null);
             const response = await axios.get('/api/dashboard/stats');
-            setStats(response.data);
+            console.log('Dashboard stats:', response.data);
+            setStats({
+                totalInvoices: response.data.totalInvoices || 0,
+                pendingReview: response.data.pendingReview || 0,
+                totalValue: response.data.totalValue || 0
+            });
         } catch (error) {
-            console.error('Error fetching stats', error);
+            console.error('Error fetching stats:', error);
+            setError('Failed to load dashboard statistics');
+            setStats({
+                totalInvoices: 0,
+                pendingReview: 0,
+                totalValue: 0
+            });
         } finally {
             setLoading(false);
         }
+    };
+
+    const formatValue = (value) => {
+        if (typeof value !== 'number') return '0';
+        return value.toLocaleString();
+    };
+
+    const formatCurrency = (value) => {
+        if (typeof value !== 'number') return '£0';
+        return `£${value.toLocaleString()}`;
     };
 
     const StatCard = ({ title, value, icon: Icon }) => (
@@ -65,6 +91,14 @@ const Dashboard = () => {
         );
     }
 
+    if (error) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+                <Typography color="error" variant="h6">{error}</Typography>
+            </Box>
+        );
+    }
+
     return (
         <Box>
             <Typography variant="h1" gutterBottom>
@@ -74,28 +108,28 @@ const Dashboard = () => {
                 <Grid item xs={12} sm={6} md={3}>
                     <StatCard
                         title="Total Invoices"
-                        value={stats.totalInvoices}
+                        value={formatValue(stats.totalInvoices)}
                         icon={DescriptionIcon}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                     <StatCard
                         title="Pending Review"
-                        value={stats.pendingReview}
+                        value={formatValue(stats.pendingReview)}
                         icon={AssessmentIcon}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                     <StatCard
                         title="Total Value"
-                        value={`£${stats.totalValue.toLocaleString()}`}
+                        value={formatCurrency(stats.totalValue)}
                         icon={MoneyIcon}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                     <StatCard
                         title="Minutes Saved"
-                        value={timer}
+                        value={formatValue(timer)}
                         icon={TimerIcon}
                     />
                 </Grid>
