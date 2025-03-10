@@ -1,14 +1,54 @@
 const mongoose = require('mongoose');
 
-const InvoiceSchema = new mongoose.Schema({
-    invoiceNumber: String,
-    companyName: String,
-    vatNumber: String,
-    address: String,
-    amount: Number,
-    status: { type: String, enum: ['pending', 'review', 'approved'], default: 'pending' },
-    confidence: Number,
-    date: { type: Date, default: Date.now }
+const invoiceSchema = new mongoose.Schema({
+    invoiceNumber: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    vendor: {
+        type: String,
+        required: true
+    },
+    amount: {
+        type: Number,
+        required: true
+    },
+    currency: {
+        type: String,
+        default: 'GBP'
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'review', 'approved', 'rejected'],
+        default: 'pending'
+    },
+    issueDate: {
+        type: Date,
+        required: true
+    },
+    dueDate: {
+        type: Date,
+        required: true
+    },
+    description: String,
+    notes: String,
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
+    }
 });
 
-module.exports = mongoose.model('Invoice', InvoiceSchema); 
+// Update the updatedAt timestamp before saving
+invoiceSchema.pre('save', function(next) {
+    this.updatedAt = Date.now();
+    next();
+});
+
+const Invoice = mongoose.model('Invoice', invoiceSchema);
+
+module.exports = Invoice; 
