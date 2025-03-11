@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const invoiceSchema = new mongoose.Schema({
     invoiceNumber: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     vendor: {
         type: String,
@@ -28,8 +27,7 @@ const invoiceSchema = new mongoose.Schema({
         required: true
     },
     dueDate: {
-        type: Date,
-        required: true
+        type: Date
     },
     description: String,
     notes: String,
@@ -45,10 +43,8 @@ const invoiceSchema = new mongoose.Schema({
 
 // Update the updatedAt timestamp before saving
 invoiceSchema.pre('save', function(next) {
-    this.updatedAt = Date.now();
+    this.updatedAt = new Date();
     next();
 });
 
-const Invoice = mongoose.model('Invoice', invoiceSchema);
-
-module.exports = Invoice; 
+module.exports = mongoose.model('Invoice', invoiceSchema); 

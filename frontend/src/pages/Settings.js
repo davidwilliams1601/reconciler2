@@ -7,12 +7,21 @@ import {
     Typography,
     Paper,
     Alert,
-    CircularProgress
+    CircularProgress,
+    Grid,
+    Divider
 } from '@mui/material';
 
 const Settings = () => {
     const [settings, setSettings] = useState({
         googleVisionApiKey: '',
+        dextApiKey: '',
+        xeroConfig: {
+            clientId: '',
+            clientSecret: '',
+            redirectUri: window.location.origin + '/xero-callback',
+            scope: 'offline_access accounting.transactions accounting.settings'
+        }
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -55,10 +64,22 @@ const Settings = () => {
     };
 
     const handleChange = (e) => {
-        setSettings(prev => ({
-            ...prev,
-            [e.target.name]: e.target.value
-        }));
+        const { name, value } = e.target;
+        if (name.includes('xeroConfig.')) {
+            const field = name.split('.')[1];
+            setSettings(prev => ({
+                ...prev,
+                xeroConfig: {
+                    ...prev.xeroConfig,
+                    [field]: value
+                }
+            }));
+        } else {
+            setSettings(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
     };
 
     if (loading) {
@@ -74,7 +95,7 @@ const Settings = () => {
             <Paper elevation={3}>
                 <Box p={3}>
                     <Typography variant="h5" gutterBottom>
-                        Settings
+                        API Settings
                     </Typography>
 
                     {error && (
@@ -90,28 +111,107 @@ const Settings = () => {
                     )}
 
                     <form onSubmit={handleSubmit}>
-                        <TextField
-                            fullWidth
-                            label="Google Vision API Key"
-                            name="googleVisionApiKey"
-                            value={settings.googleVisionApiKey || ''}
-                            onChange={handleChange}
-                            margin="normal"
-                            type="password"
-                            helperText="Enter your Google Vision API private key"
-                            required
-                        />
+                        <Grid container spacing={3}>
+                            {/* Google Vision API Section */}
+                            <Grid item xs={12}>
+                                <Typography variant="h6" gutterBottom>
+                                    Google Vision API
+                                </Typography>
+                                <TextField
+                                    fullWidth
+                                    label="API Key"
+                                    name="googleVisionApiKey"
+                                    value={settings.googleVisionApiKey}
+                                    onChange={handleChange}
+                                    type="password"
+                                    required
+                                    margin="normal"
+                                />
+                                <Typography variant="body2" color="textSecondary">
+                                    Used for OCR processing of invoice images
+                                </Typography>
+                            </Grid>
 
-                        <Box mt={2}>
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                color="primary"
-                                disabled={saving}
-                            >
-                                {saving ? 'Saving...' : 'Save Settings'}
-                            </Button>
-                        </Box>
+                            <Grid item xs={12}>
+                                <Divider />
+                            </Grid>
+
+                            {/* Dext API Section */}
+                            <Grid item xs={12}>
+                                <Typography variant="h6" gutterBottom>
+                                    Dext API
+                                </Typography>
+                                <TextField
+                                    fullWidth
+                                    label="API Key"
+                                    name="dextApiKey"
+                                    value={settings.dextApiKey}
+                                    onChange={handleChange}
+                                    type="password"
+                                    required
+                                    margin="normal"
+                                />
+                                <Typography variant="body2" color="textSecondary">
+                                    Used for invoice processing and data extraction
+                                </Typography>
+                            </Grid>
+
+                            <Grid item xs={12}>
+                                <Divider />
+                            </Grid>
+
+                            {/* Xero API Section */}
+                            <Grid item xs={12}>
+                                <Typography variant="h6" gutterBottom>
+                                    Xero API
+                                </Typography>
+                                <TextField
+                                    fullWidth
+                                    label="Client ID"
+                                    name="xeroConfig.clientId"
+                                    value={settings.xeroConfig.clientId}
+                                    onChange={handleChange}
+                                    required
+                                    margin="normal"
+                                />
+                                <TextField
+                                    fullWidth
+                                    label="Client Secret"
+                                    name="xeroConfig.clientSecret"
+                                    value={settings.xeroConfig.clientSecret}
+                                    onChange={handleChange}
+                                    type="password"
+                                    required
+                                    margin="normal"
+                                />
+                                <TextField
+                                    fullWidth
+                                    label="Redirect URI"
+                                    name="xeroConfig.redirectUri"
+                                    value={settings.xeroConfig.redirectUri}
+                                    onChange={handleChange}
+                                    required
+                                    margin="normal"
+                                />
+                                <Typography variant="body2" color="textSecondary">
+                                    Used for accounting integration and invoice reconciliation
+                                </Typography>
+                            </Grid>
+
+                            <Grid item xs={12}>
+                                <Box mt={2}>
+                                    <Button
+                                        type="submit"
+                                        variant="contained"
+                                        color="primary"
+                                        disabled={saving}
+                                        size="large"
+                                    >
+                                        {saving ? 'Saving...' : 'Save Settings'}
+                                    </Button>
+                                </Box>
+                            </Grid>
+                        </Grid>
                     </form>
                 </Box>
             </Paper>
