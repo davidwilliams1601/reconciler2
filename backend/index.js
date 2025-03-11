@@ -18,8 +18,8 @@ app.use(express.json());
 // Configure CORS
 const corsOptions = {
     origin: process.env.NODE_ENV === 'production'
-        ? ['https://reconciler-backend.onrender.com']
-        : '*', // Allow all origins in development
+        ? ['https://reconciler-backend.onrender.com', 'https://reconciler-frontend.onrender.com']
+        : ['http://localhost:3000', 'http://localhost:4001'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -63,8 +63,7 @@ app.get('/*', (req, res) => {
 });
 
 // Connect to MongoDB and start server
-const PORT = 4001;
-const HOST = 'localhost';
+const PORT = process.env.PORT || 4001;
 
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
@@ -73,11 +72,9 @@ mongoose.connect(process.env.MONGODB_URI, {
 .then(() => {
     console.log('MongoDB Connected Successfully');
     
-    const server = app.listen(PORT, HOST, () => {
-        console.log(`Server running at http://${HOST}:${PORT}`);
+    const server = app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
         console.log(`Environment: ${process.env.NODE_ENV}`);
-        console.log(`Test endpoint: http://${HOST}:${PORT}/api/test`);
-        console.log(`Frontend URL: http://${HOST}:${PORT}`);
     });
 
     server.on('error', (error) => {
