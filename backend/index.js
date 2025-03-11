@@ -33,7 +33,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// API Routes - Define these BEFORE static file serving
+// API Routes
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/auth', authRoutes);
@@ -45,21 +45,33 @@ app.get('/api/test', (req, res) => {
     res.json({ message: 'Server is working!' });
 });
 
-// Serve static files from frontend/public first (for development assets)
-app.use(express.static(path.join(__dirname, '../frontend/public')));
+// Serve static files
+if (process.env.NODE_ENV === 'production') {
+    // Serve static files from the React app
+    app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-// Then serve the production build files
-app.use(express.static(path.join(__dirname, '../frontend/build')));
+    // Handle React routing, return all requests to React app
+    app.get('*', (req, res) => {
+        if (req.url.startsWith('/api/')) {
+            return res.status(404).json({ message: 'API endpoint not found' });
+        }
+        res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+    });
+} else {
+    // Development mode
+    app.use(express.static(path.join(__dirname, '../frontend/public')));
+    app.get('*', (req, res) => {
+        if (req.url.startsWith('/api/')) {
+            return res.status(404).json({ message: 'API endpoint not found' });
+        }
+        res.sendFile(path.join(__dirname, '../frontend/public/index.html'));
+    });
+}
 
-// Catch-all handler for React router
-app.get('/*', (req, res) => {
-    // Don't handle API routes here
-    if (req.url.startsWith('/api/')) {
-        return res.status(404).json({ message: 'API endpoint not found' });
-    }
-    
-    // Send the React app's index.html for all other routes
-    res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Something broke!', error: err.message });
 });
 
 // Connect to MongoDB and start server

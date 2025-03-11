@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "build": "echo 'No build step required for backend'"
+    "build": "cd ../frontend && npm install && npm run build",
+    "postinstall": "npm run build"
   },
   "engines": {
     "node": "18.x"
