@@ -7,6 +7,7 @@ const invoiceRoutes = require('./routes/invoiceRoutes');
 const authRoutes = require('./routes/authRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const xeroRoutes = require('./routes/xeroRoutes');
 
 dotenv.config();
 const app = express();
@@ -37,6 +38,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/xero', xeroRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {

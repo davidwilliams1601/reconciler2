@@ -27,6 +27,7 @@ const Settings = () => {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
+    const [xeroConnecting, setXeroConnecting] = useState(false);
 
     const fetchSettings = useCallback(async () => {
         try {
@@ -79,6 +80,19 @@ const Settings = () => {
                 ...prev,
                 [name]: value
             }));
+        }
+    };
+
+    const handleXeroConnect = async () => {
+        try {
+            setXeroConnecting(true);
+            const response = await axios.get('/api/xero/auth-url');
+            window.location.href = response.data.authUrl;
+        } catch (error) {
+            console.error('Error getting Xero auth URL:', error);
+            setError('Failed to connect to Xero. Please try again.');
+        } finally {
+            setXeroConnecting(false);
         }
     };
 
@@ -193,6 +207,16 @@ const Settings = () => {
                                     required
                                     margin="normal"
                                 />
+                                <Box mt={2} mb={2}>
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        onClick={handleXeroConnect}
+                                        disabled={xeroConnecting || !settings.xeroConfig.clientId || !settings.xeroConfig.clientSecret}
+                                    >
+                                        {xeroConnecting ? 'Connecting...' : 'Connect to Xero'}
+                                    </Button>
+                                </Box>
                                 <Typography variant="body2" color="textSecondary">
                                     Used for accounting integration and invoice reconciliation
                                 </Typography>
