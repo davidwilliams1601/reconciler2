@@ -12,8 +12,10 @@ services:
 
   - type: static
     name: reconciler-frontend
-    buildCommand: cd frontend && npm install && CI=false npm run build
-    publishPath: frontend/build
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishPath: build
+    serveDir: build
     routes:
       - type: rewrite
         source: /*
