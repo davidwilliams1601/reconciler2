@@ -10,13 +10,11 @@ services:
       - key: PORT
         value: 4001
 
-  - type: static
+  - type: web
     name: reconciler-frontend
-    rootDir: frontend
-    buildCommand: |
-      npm install
-      npm run build
-    publishDir: build
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/build
     envVars:
       - key: NODE_ENV
         value: production
