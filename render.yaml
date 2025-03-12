@@ -9,6 +9,12 @@ services:
         value: production
       - key: PORT
         value: 4001
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://reconciler-frontend.onrender.com
 
   - type: static
     name: reconciler-frontend
