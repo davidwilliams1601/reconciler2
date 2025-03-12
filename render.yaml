@@ -17,6 +17,7 @@ services:
       npm install
       CI=false npm run build
     publishPath: frontend/build
+    staticPublishPath: /
     headers:
       - source: /**
         headers:
