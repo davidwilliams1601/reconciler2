@@ -9,7 +9,7 @@
     "build": "echo 'No build step required for backend'"
   },
   "engines": {
-    "node": "18.x"
+    "node": "18.17.1"
   },
   "dependencies": {
     "@google-cloud/vision": "^4.0.2",

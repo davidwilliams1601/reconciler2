@@ -9,7 +9,16 @@ const settingsRoutes = require('./routes/settingsRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const xeroRoutes = require('./routes/xeroRoutes');
 
+// Load environment variables
 dotenv.config();
+
+// Debug environment variables
+console.log('Environment Variables:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
+console.log('CORS_ORIGIN:', process.env.CORS_ORIGIN);
+
 const app = express();
 
 // Basic middleware
