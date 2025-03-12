@@ -12,12 +12,16 @@ services:
 
   - type: static
     name: reconciler-frontend
+    rootDir: frontend
     buildCommand: |
       npm install
-      cd frontend
-      npm install
       npm run build
-    publishDir: frontend/build
+    publishDir: build
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CI
+        value: false
     routes:
       - type: rewrite
         source: /*
