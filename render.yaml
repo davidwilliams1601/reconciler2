@@ -13,8 +13,8 @@ services:
   - type: static
     name: reconciler-frontend
     rootDir: frontend
-    buildCommand: CI=false npm install && CI=false npm run build
-    publishPath: ./build
+    buildCommand: cd frontend && CI=false npm install && CI=false npm run build
+    publishPath: frontend/build
     routes:
       - type: rewrite
         source: /*
