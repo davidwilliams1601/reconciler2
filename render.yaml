@@ -12,14 +12,9 @@ services:
 
   - type: static
     name: reconciler-frontend
-    buildCommand: |
-      cd frontend
-      npm install
-      CI=false npm run build
+    buildCommand: cd frontend && npm install && CI=false npm run build
     publishPath: frontend/build
-    staticPublishPath: /
-    headers:
-      - source: /**
-        headers:
-          - key: Cache-Control
-            value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
