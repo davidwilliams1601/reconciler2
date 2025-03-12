@@ -6,6 +6,13 @@ const Settings = require('../models/Settings');
 // The scopes we need for the application
 const XERO_SCOPES = 'offline_access accounting.transactions accounting.settings';
 
+// Get the frontend URL based on environment
+const getFrontendURL = () => {
+    return process.env.NODE_ENV === 'production'
+        ? 'https://reconciler-frontend.onrender.com'
+        : 'http://localhost:3000';
+};
+
 // Generate Xero authorization URL
 router.get('/auth-url', async (req, res) => {
     try {
@@ -13,6 +20,8 @@ router.get('/auth-url', async (req, res) => {
         if (!settings || !settings.xeroConfig.clientId) {
             return res.status(400).json({ message: 'Xero configuration not found' });
         }
+
+        console.log('Generating Xero auth URL with redirect URI:', settings.xeroConfig.redirectUri);
 
         const authUrl = `https://login.xero.com/identity/connect/authorize?` +
             `response_type=code` +
@@ -24,23 +33,26 @@ router.get('/auth-url', async (req, res) => {
         res.json({ authUrl });
     } catch (error) {
         console.error('Error generating auth URL:', error);
-        res.status(500).json({ message: 'Error generating authorization URL' });
+        res.status(500).json({ message: 'Error generating authorization URL', error: error.message });
     }
 });
 
 // Handle Xero OAuth callback
 router.get('/callback', async (req, res) => {
     const { code, state } = req.query;
+    console.log('Received Xero callback with code:', code ? 'present' : 'missing');
 
     if (!code) {
-        return res.status(400).json({ message: 'Authorization code not received' });
+        return res.redirect(`${getFrontendURL()}/settings?xero=error&message=no_code`);
     }
 
     try {
         const settings = await Settings.findOne();
         if (!settings) {
-            return res.status(400).json({ message: 'Settings not found' });
+            return res.redirect(`${getFrontendURL()}/settings?xero=error&message=no_settings`);
         }
+
+        console.log('Exchanging code for tokens with redirect URI:', settings.xeroConfig.redirectUri);
 
         // Exchange the authorization code for tokens
         const tokenResponse = await fetch('https://identity.xero.com/connect/token', {
@@ -58,14 +70,21 @@ router.get('/callback', async (req, res) => {
             })
         });
 
+        if (!tokenResponse.ok) {
+            const errorData = await tokenResponse.text();
+            console.error('Xero token exchange failed:', errorData);
+            return res.redirect(`${getFrontendURL()}/settings?xero=error&message=token_exchange_failed`);
+        }
+
         const tokens = await tokenResponse.json();
+        console.log('Successfully received Xero tokens');
 
         // Here you would typically store the tokens securely
         // For now, we'll just return success
-        res.redirect('/settings?xero=success');
+        res.redirect(`${getFrontendURL()}/settings?xero=success`);
     } catch (error) {
         console.error('Error in Xero callback:', error);
-        res.redirect('/settings?xero=error');
+        res.redirect(`${getFrontendURL()}/settings?xero=error&message=server_error`);
     }
 });
 

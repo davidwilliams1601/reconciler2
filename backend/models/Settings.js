@@ -3,38 +3,33 @@ const mongoose = require('mongoose');
 const settingsSchema = new mongoose.Schema({
     googleVisionApiKey: {
         type: String,
-        required: true
+        default: ''
     },
     dextApiKey: {
         type: String,
-        required: true
+        default: ''
     },
     xeroConfig: {
         clientId: {
             type: String,
-            required: true
+            default: ''
         },
         clientSecret: {
             type: String,
-            required: true
+            default: ''
         },
         redirectUri: {
             type: String,
-            required: true
+            default: ''
         },
         scope: {
             type: String,
             default: 'offline_access accounting.transactions accounting.settings'
         }
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
     }
+}, { 
+    timestamps: true,
+    minimize: false 
 });
 
 // Update the updatedAt timestamp before saving

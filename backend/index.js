@@ -18,20 +18,38 @@ app.use(express.json());
 // Configure CORS
 const corsOptions = {
     origin: process.env.NODE_ENV === 'production'
-        ? ['https://reconciler-backend.onrender.com', 'https://reconciler-frontend.onrender.com']
+        ? [
+            'https://reconciler-frontend.onrender.com',
+            'https://reconciler-backend.onrender.com',
+            'https://reconciler-frontend.onrender.com/',
+            'https://reconciler-backend.onrender.com/'
+          ]
         : ['http://localhost:3000', 'http://localhost:4001'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+    exposedHeaders: ['Content-Length', 'X-Requested-With'],
     optionsSuccessStatus: 200
 };
-app.use(cors(corsOptions));
 
-// Simple request logging
+// Add CORS debugging
 app.use((req, res, next) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    console.log('Origin:', req.headers.origin);
+    console.log('Environment:', process.env.NODE_ENV);
     next();
 });
+
+app.use(cors(corsOptions));
+
+// Serve static files first (before API routes)
+if (process.env.NODE_ENV === 'production') {
+    // Serve static files from the React app
+    app.use(express.static(path.join(__dirname, '../frontend/build'), {
+        maxAge: '1y',
+        etag: true
+    }));
+}
 
 // API Routes
 app.use('/api/dashboard', dashboardRoutes);
@@ -45,26 +63,24 @@ app.get('/api/test', (req, res) => {
     res.json({ message: 'Server is working!' });
 });
 
-// Serve static files
+// Handle all other routes
 if (process.env.NODE_ENV === 'production') {
-    // Serve static files from the React app
-    app.use(express.static(path.join(__dirname, '../frontend/build')));
-
-    // Handle React routing, return all requests to React app
-    app.get('*', (req, res) => {
-        if (req.url.startsWith('/api/')) {
+    app.get('*', function(req, res) {
+        // Don't handle API routes here
+        if (req.path.startsWith('/api/')) {
             return res.status(404).json({ message: 'API endpoint not found' });
         }
+        
+        console.log('Serving index.html for path:', req.path);
         res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
     });
 } else {
-    // Development mode
     app.use(express.static(path.join(__dirname, '../frontend/public')));
-    app.get('*', (req, res) => {
-        if (req.url.startsWith('/api/')) {
+    app.get('*', function(req, res) {
+        if (req.path.startsWith('/api/')) {
             return res.status(404).json({ message: 'API endpoint not found' });
         }
-        res.sendFile(path.join(__dirname, '../frontend/public/index.html'));
+        res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
     });
 }
 

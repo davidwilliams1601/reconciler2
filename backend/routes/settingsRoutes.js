@@ -8,16 +8,8 @@ router.get('/', async (req, res) => {
         let settings = await Settings.findOne();
         
         if (!settings) {
-            settings = new Settings({
-                googleVisionApiKey: '',
-                dextApiKey: '',
-                xeroConfig: {
-                    clientId: '',
-                    clientSecret: '',
-                    redirectUri: '',
-                    scope: 'offline_access accounting.transactions accounting.settings'
-                }
-            });
+            // Create initial settings with empty values
+            settings = new Settings();
             await settings.save();
         }
 
@@ -28,7 +20,7 @@ router.get('/', async (req, res) => {
             xeroConfig: {
                 clientId: settings.xeroConfig.clientId ? '********' : '',
                 clientSecret: settings.xeroConfig.clientSecret ? '********' : '',
-                redirectUri: settings.xeroConfig.redirectUri,
+                redirectUri: settings.xeroConfig.redirectUri || '',
                 scope: settings.xeroConfig.scope
             }
         };
@@ -45,37 +37,33 @@ router.post('/', async (req, res) => {
     try {
         const { googleVisionApiKey, dextApiKey, xeroConfig } = req.body;
 
-        // Validate required fields
-        if (googleVisionApiKey === undefined || dextApiKey === undefined || !xeroConfig) {
-            return res.status(400).json({ message: 'Missing required fields' });
-        }
-
-        // Validate Xero config
-        if (!xeroConfig.clientId || !xeroConfig.clientSecret || !xeroConfig.redirectUri) {
-            return res.status(400).json({ message: 'Missing required Xero configuration fields' });
-        }
-
         let settings = await Settings.findOne();
 
         if (!settings) {
             settings = new Settings();
         }
 
-        // Only update non-empty values
-        if (googleVisionApiKey !== '********') {
+        // Update fields if they're not masked
+        if (googleVisionApiKey && googleVisionApiKey !== '********') {
             settings.googleVisionApiKey = googleVisionApiKey;
         }
-        if (dextApiKey !== '********') {
+        if (dextApiKey && dextApiKey !== '********') {
             settings.dextApiKey = dextApiKey;
         }
-        if (xeroConfig.clientId !== '********') {
-            settings.xeroConfig.clientId = xeroConfig.clientId;
+        if (xeroConfig) {
+            if (xeroConfig.clientId && xeroConfig.clientId !== '********') {
+                settings.xeroConfig.clientId = xeroConfig.clientId;
+            }
+            if (xeroConfig.clientSecret && xeroConfig.clientSecret !== '********') {
+                settings.xeroConfig.clientSecret = xeroConfig.clientSecret;
+            }
+            if (xeroConfig.redirectUri) {
+                settings.xeroConfig.redirectUri = xeroConfig.redirectUri;
+            }
+            if (xeroConfig.scope) {
+                settings.xeroConfig.scope = xeroConfig.scope;
+            }
         }
-        if (xeroConfig.clientSecret !== '********') {
-            settings.xeroConfig.clientSecret = xeroConfig.clientSecret;
-        }
-        settings.xeroConfig.redirectUri = xeroConfig.redirectUri;
-        settings.xeroConfig.scope = xeroConfig.scope;
 
         await settings.save();
         res.json({ message: 'Settings updated successfully' });
