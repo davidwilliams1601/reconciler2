@@ -4,15 +4,15 @@
   "description": "Invoice Reconciliation Application",
   "main": "index.js",
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   },
   "scripts": {
     "install-backend": "cd backend && npm install",
     "install-frontend": "cd frontend && npm install",
     "build-frontend": "cd frontend && npm run build",
-    "start-backend": "node index.js",
-    "heroku-postbuild": "npm run install-frontend && npm run build-frontend && npm run install-backend",
-    "start": "node index.js",
+    "start-backend": "cd backend && node index.js",
+    "deploy": "npm run install-frontend && npm run build-frontend && npm run install-backend",
+    "start": "cd backend && node index.js",
     "dev": "cd backend && npm run dev"
   },
   "dependencies": {
