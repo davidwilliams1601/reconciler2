@@ -2,7 +2,7 @@
   "name": "invoice-reconciliation-frontend",
   "version": "1.0.0",
   "private": true,
-  "homepage": "https://reconciler-frontend.onrender.com",
+  "homepage": ".",
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
