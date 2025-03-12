@@ -19,8 +19,15 @@ services:
   - type: static
     name: reconciler-frontend
     rootDir: frontend
-    buildCommand: cd frontend && CI=false npm install && CI=false npm run build
-    publishPath: frontend/build
+    buildCommand: npm install && npm run build
+    publishPath: build
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CI
+        value: false
+      - key: REACT_APP_API_URL
+        value: https://reconciler-backend.onrender.com
     routes:
       - type: rewrite
         source: /*
